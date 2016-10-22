@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-#   Numeric Curvature Calcration Lib
+#   Numeric Curvature Calculation Lib
 #
 #   author: Atsushi Sakai
 from PyCubicSpline import PyCubicSpline
@@ -12,7 +12,7 @@ def CalcCurvature(x,y,npo=1):
     u"""
     Calc curvature
     x,y: x-y position list
-    npo: the number of points using calcration curvature
+    npo: the number of points using Calculation curvature
     ex) npo=1: using 3 point
         npo=2: using 5 point
         npo=3: using 7 point
@@ -113,7 +113,7 @@ if __name__ == '__main__':
     ry=[spline.Calc(i) for i in rx]
     rc=[spline.CalcCurvature(i) for i in rx]
 
-    nc=CalcCurvature(rx,ry)
+    nc=CalcCurvature(rx,ry,2)
 
     #  plt.plot(x,y,"xb")
     #  plt.plot(rx,ry,"-r")
