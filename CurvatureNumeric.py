@@ -61,10 +61,12 @@ def calc_curvature_with_yaw_diff(x, y, yaw):
     dists = np.array([np.hypot(dx, dy) for dx, dy in zip(np.diff(x), np.diff(y))])
     d_yaw = np.diff(make_angles_continuous(yaw))
     curvatures = d_yaw / dists
+    curvatures = np.concatenate([curvatures, [0.0]])
+
     return curvatures
 
 
-def calc_curvature_with_circle_fitting(x, y, npo=1):
+def calc_curvature_circle_fitting(x, y, npo=1):
     """
     Calc curvature
     x,y: x-y position list
@@ -75,7 +77,6 @@ def calc_curvature_with_circle_fitting(x, y, npo=1):
     """
 
     cv = []
-
     n_data = len(x)
 
     for i in range(n_data):
@@ -146,7 +147,7 @@ def CircleFitting(x, y):
 
     cxe = float(T[0] / -2)
     cye = float(T[1] / -2)
-    #  print (cxe,cye,T)
+
     try:
         re = math.sqrt(cxe ** 2 + cye ** 2 - T[2])
     except np.linalg.LinAlgError:
@@ -159,7 +160,7 @@ def main():
     import matplotlib.pyplot as plt
     cx = [-2.5, 0.0, 2.5, 5.0, 7.5, 3.0, -1.0]
     cy = [0.7, -6, 5, 6.5, 0.0, 5.0, -2.0]
-    x, y, yaw, k, s = pycubicspline.calc_spline_course(cx, cy, ds=0.1)
+    x, y, yaw, k, travel = pycubicspline.calc_spline_course(cx, cy, num=200)
 
     fig, axes = plt.subplots(2)
     axes[0].plot(cx, cy, "xb", label="input")
@@ -171,18 +172,18 @@ def main():
     axes[0].legend()
 
     # circle fitting
-    travel = np.cumsum([np.hypot(dx, dy) for dx, dy in zip(np.diff(x), np.diff(y))])
-    curvature_circle_fitting = calc_curvature_with_circle_fitting(x, y)[1:]
+    # travel = [np.hypot(dx, dy) for dx, dy in zip(np.diff(x), np.diff(y))]
+    curvature_circle_fitting = calc_curvature_circle_fitting(x, y)
     curvature_yaw_diff = calc_curvature_with_yaw_diff(x, y, yaw)
     # Note: range_kutta returns absolute curvature
     curvature_range_kutta = calc_curvature_range_kutta(x, y)
     curvature_2_derivative = calc_curvature_2_derivative(x, y)
 
-    axes[1].plot(s, k, "-r", label="analytic curvature")
+    axes[1].plot(travel, k, "-r", label="analytic curvature")
     axes[1].plot(travel, curvature_circle_fitting, "-b", label="circle_fitting")
     axes[1].plot(travel, curvature_yaw_diff, "-g", label="yaw_angle_diff")
-    axes[1].plot(travel, curvature_range_kutta, "-c", label="range_kutta")
-    axes[1].plot(travel, curvature_2_derivative, "-k", label="2_derivative")
+    axes[1].plot(travel[:-1], curvature_range_kutta, "-c", label="range_kutta")
+    axes[1].plot(travel[:-1], curvature_2_derivative, "-k", label="2_derivative")
     axes[1].grid(True)
     axes[1].legend()
     axes[1].set_xlabel("line length[m]")
