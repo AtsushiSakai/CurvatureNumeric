@@ -157,23 +157,13 @@ def CircleFitting(x, y):
 def main():
     print("Spline 2D test")
     import matplotlib.pyplot as plt
-    x = [-2.5, 0.0, 2.5, 5.0, 7.5, 3.0, -1.0]
-    y = [0.7, -6, 5, 6.5, 0.0, 5.0, -2.0]
-
-    sp = pycubicspline.Spline2D(x, y)
-    s = np.arange(0, sp.s[-1], 0.1)
-
-    r_x, r_y, r_yaw, rk = [], [], [], []
-    for i_s in s:
-        ix, iy = sp.calc_position(i_s)
-        r_x.append(ix)
-        r_y.append(iy)
-        r_yaw.append(sp.calc_yaw(i_s))
-        rk.append(sp.calc_curvature(i_s))
+    cx = [-2.5, 0.0, 2.5, 5.0, 7.5, 3.0, -1.0]
+    cy = [0.7, -6, 5, 6.5, 0.0, 5.0, -2.0]
+    x, y, yaw, k, s = pycubicspline.calc_spline_course(cx, cy, ds=0.1)
 
     fig, axes = plt.subplots(2)
-    axes[0].plot(x, y, "xb", label="input")
-    axes[0].plot(r_x, r_y, "-r", label="spline")
+    axes[0].plot(cx, cy, "xb", label="input")
+    axes[0].plot(x, y, "-r", label="spline")
     axes[0].grid(True)
     axes[0].axis("equal")
     axes[0].set_xlabel("x[m]")
@@ -181,14 +171,14 @@ def main():
     axes[0].legend()
 
     # circle fitting
-    travel = np.cumsum([np.hypot(dx, dy) for dx, dy in zip(np.diff(r_x), np.diff(r_y))])
-    curvature_circle_fitting = calc_curvature_with_circle_fitting(r_x, r_y)[1:]
-    curvature_yaw_diff = calc_curvature_with_yaw_diff(r_x, r_y, r_yaw)
+    travel = np.cumsum([np.hypot(dx, dy) for dx, dy in zip(np.diff(x), np.diff(y))])
+    curvature_circle_fitting = calc_curvature_with_circle_fitting(x, y)[1:]
+    curvature_yaw_diff = calc_curvature_with_yaw_diff(x, y, yaw)
     # Note: range_kutta returns absolute curvature
-    curvature_range_kutta = calc_curvature_range_kutta(r_x, r_y)
-    curvature_2_derivative = calc_curvature_2_derivative(r_x, r_y)
+    curvature_range_kutta = calc_curvature_range_kutta(x, y)
+    curvature_2_derivative = calc_curvature_2_derivative(x, y)
 
-    axes[1].plot(s, rk, "-r", label="analytic curvature")
+    axes[1].plot(s, k, "-r", label="analytic curvature")
     axes[1].plot(travel, curvature_circle_fitting, "-b", label="circle_fitting")
     axes[1].plot(travel, curvature_yaw_diff, "-g", label="yaw_angle_diff")
     axes[1].plot(travel, curvature_range_kutta, "-c", label="range_kutta")
