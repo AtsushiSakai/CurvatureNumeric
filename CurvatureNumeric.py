@@ -163,7 +163,7 @@ def main():
     import matplotlib.pyplot as plt
     cx = [-2.5, 0.0, 2.5, 5.0, 7.5, 3.0, -1.0]
     cy = [0.7, -6, 5, 6.5, 0.0, 5.0, -2.0]
-    x, y, yaw, k, travel = pycubicspline.calc_spline_course(cx, cy, num=200)
+    x, y, yaw, k, travel = pycubicspline.calc_2d(cx, cy, num=200)
 
     fig, axes = plt.subplots(2)
     axes[0].plot(cx, cy, "xb", label="input")
