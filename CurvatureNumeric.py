@@ -31,10 +31,13 @@ def calc_curvature_range_kutta(x, y):
     dists = np.array([np.hypot(dx, dy) for dx, dy in zip(np.diff(x), np.diff(y))])
     curvatures = [0.0, 0.0]
     for i in np.arange(2, len(x)-1):
+        dx = (x[i+1] - x[i])/dists[i]
+        dy = (y[i+1] - y[i])/dists[i]
         ddx = (x[i-2] - x[i-1] - x[i] + x[i+1])/(2*dists[i]**2)
         ddy = (y[i-2] - y[i-1] - y[i] + y[i+1])/(2*dists[i]**2)
-        curvatures.append(np.hypot(ddx, ddy))
-
+        curvature = (ddy * dx - ddx * dy) / ((dx ** 2 + dy ** 2) ** 1.5)
+        curvatures.append(curvature)
+    curvatures.append(0.0)
     return curvatures
 
 
@@ -52,7 +55,7 @@ def calc_curvature_2_derivative(x, y):
         ddx = 2.0 / (dn + dp) * (dxp / dp - dxn / dn)
         dy = 1.0 / (dn + dp) * (dp / dn * dyn + dn / dp * dyp)
         ddy = 2.0 / (dn + dp) * (dyp / dp - dyn / dn)
-        curvature = (ddy * dx - ddx * dy) / (dx ** 2 + dy ** 2)
+        curvature = (ddy * dx - ddx * dy) / ((dx ** 2 + dy ** 2) ** 1.5)
         curvatures.append(curvature)
     return curvatures
 
@@ -182,7 +185,7 @@ def main():
     axes[1].plot(travel, k, "-r", label="analytic curvature")
     axes[1].plot(travel, curvature_circle_fitting, "-b", label="circle_fitting")
     axes[1].plot(travel, curvature_yaw_diff, "-g", label="yaw_angle_diff")
-    axes[1].plot(travel[:-1], curvature_range_kutta, "-c", label="range_kutta")
+    axes[1].plot(travel, curvature_range_kutta, "-c", label="range_kutta")
     axes[1].plot(travel[:-1], curvature_2_derivative, "-k", label="2_derivative")
     axes[1].grid(True)
     axes[1].legend()
